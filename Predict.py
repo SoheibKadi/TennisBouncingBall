@@ -4,6 +4,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from GridTrackNet import GridTrackNet
+from bounce_detector import BounceDetector
 
 WIDTH = 768
 HEIGHT = 432
@@ -182,3 +183,10 @@ if __name__ == "__main__":
     video_writer.release()
 
     cv2.destroyAllWindows()
+
+    # bounce detection
+    bounce_detector = BounceDetector(args.path_bounce_model)
+    x_ball = [x[0] for x in allBallCoordinates]
+    y_ball = [x[1] for x in allBallCoordinates]
+    bounces = bounce_detector.predict(x_ball, y_ball)
+
