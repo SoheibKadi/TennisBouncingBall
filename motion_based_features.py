@@ -76,5 +76,12 @@ def get_blob_features(blob):
     # normalize the angle to be between 0 and 180 degrees
     angle = angle if angle < 180 else angle - 180
 
-    return center[0], center[1], area, angle, size[0], size[1]
+    if size[0] < size[1]:
+        size_big = size[1]
+        size_small = size[0]
+    else:
+        size_big = size[0]
+        size_small = size[1]
+
+    return center[0], center[1], area, angle, size_big, size_small
 

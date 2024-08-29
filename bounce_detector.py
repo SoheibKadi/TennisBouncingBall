@@ -5,9 +5,10 @@ from scipy.interpolate import CubicSpline
 from scipy.spatial import distance
 
 class BounceDetector:
-    def __init__(self, path_model=None):
+    def __init__(self, path_model=None, is_new_model=False):
         self.model = ctb.CatBoostRegressor()
         self.threshold = 0.45
+        self.is_new_model = is_new_model
         if path_model:
             self.load_model(path_model)
         
@@ -51,6 +52,17 @@ class BounceDetector:
         if smooth:
             x_ball, y_ball = self.smooth_predictions(x_ball, y_ball)
         features, num_frames = self.prepare_features(x_ball, y_ball)
+        preds = self.model.predict(features)
+        ind_bounce = np.where(preds > self.threshold)[0]
+        if len(ind_bounce) > 0:
+            ind_bounce = self.postprocess(ind_bounce, preds)
+        frames_bounce = [num_frames[x] for x in ind_bounce]
+        return set(frames_bounce)
+
+    def predict_new(self, x_ball, y_ball, area, angle, size_1, size_2, smooth=True):
+        if smooth:
+            x_ball, y_ball = self.smooth_predictions(x_ball, y_ball)
+        features, num_frames = self.prepare_features(x_ball, y_ball, area, angle, size_1, size_2)
         preds = self.model.predict(features)
         ind_bounce = np.where(preds > self.threshold)[0]
         if len(ind_bounce) > 0:
