@@ -135,6 +135,7 @@ if __name__ == "__main__":
 
     frames = []
     ballCoordinatesHistory = []
+    allBallCoordinates = []
     numPredicted = 0
     while cap.isOpened():
         ret, frame = cap.read()
@@ -150,6 +151,8 @@ if __name__ == "__main__":
                 ballCoordinates = getPredictions(frames, True)
                 for ball in ballCoordinates:
                     ballCoordinatesHistory.append(ball)
+
+                allBallCoordinates.extend(ballCoordinates)
                     
                 for i, frame in enumerate(frames):
                     if(i < len(ballCoordinates)):
@@ -169,6 +172,11 @@ if __name__ == "__main__":
         index += 1
         percentage = numPredicted*100/totalFrames
         print('Exporting...[%d%%]\r'%int(percentage), end="")
+
+    # save ball coordinates to a text file
+    with open(os.path.join(directory, name + "_coordinates.txt"), "w") as f:
+        for ball in allBallCoordinates:
+            f.write(str(ball[0]) + " " + str(ball[1]) + "\n")
 
     cap.release()
     video_writer.release()
