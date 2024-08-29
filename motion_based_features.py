@@ -3,20 +3,21 @@ import cv2
 import numpy as np
 
 
-def motion_detection(previous_frame, current_frame):
+def motion_detection(previous_frame, current_frame, threshold=15, blur=False, blur_kernel_size=(5, 5)):
     # Convert the frames to grayscale
     previous_frame_gray = cv2.cvtColor(previous_frame, cv2.COLOR_BGR2GRAY)
     current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
 
     # Guassian blur the frames
-    #previous_frame_gray = cv2.GaussianBlur(previous_frame_gray, (5, 5), 0)
-    #current_frame_gray = cv2.GaussianBlur(current_frame_gray, (5, 5), 0)
+    if blur:
+        previous_frame_gray = cv2.GaussianBlur(previous_frame_gray, blur_kernel_size, 0)
+        current_frame_gray = cv2.GaussianBlur(current_frame_gray, blur_kernel_size, 0)
 
     # Get the difference between the two frames
     frame_diff = cv2.absdiff(previous_frame_gray, current_frame_gray)
 
     # Apply a threshold to the difference
-    _, frame_diff = cv2.threshold(frame_diff, 15, 255, cv2.THRESH_BINARY)
+    _, frame_diff = cv2.threshold(frame_diff, threshold, 255, cv2.THRESH_BINARY)
 
     return frame_diff
 
