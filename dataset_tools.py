@@ -22,6 +22,9 @@ def load_data(dataset_path=dataset_path):
     motion_based_features = MotionBasedFeatures()
     for game in os.listdir(dataset_path):
         game_path = os.path.join(dataset_path, game)
+        if not os.path.isdir(game_path):
+            continue
+
         dataset[game] = dict()
         for clip in os.listdir(game_path):
             clip_path = os.path.join(game_path, clip)
@@ -52,7 +55,6 @@ def load_data(dataset_path=dataset_path):
 
             dataset[game][clip] = features
 
-
     return dataset
 
 
@@ -60,15 +62,15 @@ def test_load_data():
     dataset = load_data()
     assert len(dataset) > 0
     assert len(dataset['game1']) > 0
-    assert len(dataset['game1']['clip1']) > 0
-    assert len(dataset['game1']['clip1']['frame_id']) > 0
-    assert len(dataset['game1']['clip1']['ball_x']) > 0
-    assert len(dataset['game1']['clip1']['ball_y']) > 0
-    assert len(dataset['game1']['clip1']['area']) > 0
-    assert len(dataset['game1']['clip1']['angle']) > 0
-    assert len(dataset['game1']['clip1']['size1']) > 0
-    assert len(dataset['game1']['clip1']['size2']) > 0
-    assert len(dataset['game1']['clip1']['bounce']) > 0
+    assert len(dataset['game1']['Clip1']) > 0
+    assert len(dataset['game1']['Clip1']['frame_id']) > 0
+    assert len(dataset['game1']['Clip1']['ball_x']) > 0
+    assert len(dataset['game1']['Clip1']['ball_y']) > 0
+    assert len(dataset['game1']['Clip1']['area']) > 0
+    assert len(dataset['game1']['Clip1']['angle']) > 0
+    assert len(dataset['game1']['Clip1']['size1']) > 0
+    assert len(dataset['game1']['Clip1']['size2']) > 0
+    assert len(dataset['game1']['Clip1']['bounce']) > 0
     print('Test passed')
 
 
