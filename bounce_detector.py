@@ -47,6 +47,85 @@ class BounceDetector:
 
         features = labels[colnames]
         return features, list(labels['frame'])
+
+    def prepare_features_new(self, x_ball, y_ball, area, angle, size_1, size_2):
+        labels = pd.DataFrame({'frame': range(len(x_ball)), 'x-coordinate': x_ball, 'y-coordinate': y_ball, 'area': area, 'angle': angle, 'size_1': size_1, 'size_2': size_2})
+
+        num = 5
+        eps = 1e-15
+        for i in range(1, num):
+            labels['x_lag_{}'.format(i)] = labels['x-coordinate'].shift(i)
+            labels['x_lag_inv_{}'.format(i)] = labels['x-coordinate'].shift(-i)
+            labels['y_lag_{}'.format(i)] = labels['y-coordinate'].shift(i)
+            labels['y_lag_inv_{}'.format(i)] = labels['y-coordinate'].shift(-i)
+            labels['x_diff_{}'.format(i)] = abs(labels['x_lag_{}'.format(i)] - labels['x-coordinate'])
+            labels['y_diff_{}'.format(i)] = labels['y_lag_{}'.format(i)] - labels['y-coordinate']
+            labels['x_diff_inv_{}'.format(i)] = abs(labels['x_lag_inv_{}'.format(i)] - labels['x-coordinate'])
+            labels['y_diff_inv_{}'.format(i)] = labels['y_lag_inv_{}'.format(i)] - labels['y-coordinate']
+            labels['x_div_{}'.format(i)] = abs(
+                labels['x_diff_{}'.format(i)] / (labels['x_diff_inv_{}'.format(i)] + eps))
+            labels['y_div_{}'.format(i)] = labels['y_diff_{}'.format(i)] / (labels['y_diff_inv_{}'.format(i)] + eps)
+            labels['area_lag_{}'.format(i)] = labels['area'].shift(i)
+            labels['area_lag_inv_{}'.format(i)] = labels['area'].shift(-i)
+            labels['area_diff_{}'.format(i)] = abs(labels['area_lag_{}'.format(i)] - labels['area'])
+            labels['area_diff_inv_{}'.format(i)] = abs(labels['area_lag_inv_{}'.format(i)] - labels['area'])
+            labels['area_div_{}'.format(i)] = abs(
+                labels['area_diff_{}'.format(i)] / (labels['area_diff_inv_{}'.format(i)] + eps))
+            labels['angle_lag_{}'.format(i)] = labels['angle'].shift(i)
+            labels['angle_lag_inv_{}'.format(i)] = labels['angle'].shift(-i)
+            labels['angle_diff_{}'.format(i)] = abs(labels['angle_lag_{}'.format(i)] - labels['angle'])
+            labels['angle_diff_inv_{}'.format(i)] = abs(labels['angle_lag_inv_{}'.format(i)] - labels['angle'])
+            labels['angle_div_{}'.format(i)] = abs(
+                labels['angle_diff_{}'.format(i)] / (labels['angle_diff_inv_{}'.format(i)] + eps))
+            labels['size_1_lag_{}'.format(i)] = labels['size_1'].shift(i)
+            labels['size_1_lag_inv_{}'.format(i)] = labels['size_1'].shift(-i)
+            labels['size_1_diff_{}'.format(i)] = abs(labels['size_1_lag_{}'.format(i)] - labels['size_1'])
+            labels['size_1_diff_inv_{}'.format(i)] = abs(labels['size_1_lag_inv_{}'.format(i)] - labels['size_1'])
+            labels['size_1_div_{}'.format(i)] = abs(
+                labels['size_1_diff_{}'.format(i)] / (labels['size_1_diff_inv_{}'.format(i)] + eps))
+            labels['size_2_lag_{}'.format(i)] = labels['size_2'].shift(i)
+            labels['size_2_lag_inv_{}'.format(i)] = labels['size_2'].shift(-i)
+            labels['size_2_diff_{}'.format(i)] = abs(labels['size_2_lag_{}'.format(i)] - labels['size_2'])
+            labels['size_2_diff_inv_{}'.format(i)] = abs(labels['size_2_lag_inv_{}'.format(i)] - labels['size_2'])
+            labels['size_2_div_{}'.format(i)] = abs(
+                labels['size_2_diff_{}'.format(i)] / (labels['size_2_diff_inv_{}'.format(i)] + eps))
+
+        for i in range(1, num):
+            labels = labels[labels['x_lag_{}'.format(i)].notna()]
+            labels = labels[labels['x_lag_inv_{}'.format(i)].notna()]
+            labels = labels[labels['area_lag_{}'.format(i)].notna()]
+            labels = labels[labels['area_lag_inv_{}'.format(i)].notna()]
+            labels = labels[labels['angle_lag_{}'.format(i)].notna()]
+            labels = labels[labels['angle_lag_inv_{}'.format(i)].notna()]
+            labels = labels[labels['size_1_lag_{}'.format(i)].notna()]
+            labels = labels[labels['size_1_lag_inv_{}'.format(i)].notna()]
+            labels = labels[labels['size_2_lag_{}'.format(i)].notna()]
+            labels = labels[labels['size_2_lag_inv_{}'.format(i)].notna()]
+
+        labels = labels[labels['x-coordinate'].notna()]
+
+        colnames_x = ['x_diff_{}'.format(i) for i in range(1, num)] + \
+                     ['x_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                     ['x_div_{}'.format(i) for i in range(1, num)]
+        colnames_y = ['y_diff_{}'.format(i) for i in range(1, num)] + \
+                     ['y_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                     ['y_div_{}'.format(i) for i in range(1, num)]
+        colnames_area = ['area_diff_{}'.format(i) for i in range(1, num)] + \
+                        ['area_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                        ['area_div_{}'.format(i) for i in range(1, num)]
+        colnames_angle = ['angle_diff_{}'.format(i) for i in range(1, num)] + \
+                            ['angle_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                            ['angle_div_{}'.format(i) for i in range(1, num)]
+        colnames_size_1 = ['size_1_diff_{}'.format(i) for i in range(1, num)] + \
+                            ['size_1_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                            ['size_1_div_{}'.format(i) for i in range(1, num)]
+        colnames_size_2 = ['size_2_diff_{}'.format(i) for i in range(1, num)] + \
+                            ['size_2_diff_inv_{}'.format(i) for i in range(1, num)] + \
+                            ['size_2_div_{}'.format(i) for i in range(1, num)]
+        colnames = colnames_x + colnames_y + colnames_area + colnames_angle + colnames_size_1 + colnames_size_2
+
+        features = labels[colnames]
+        return features, list(labels['frame'])
     
     def predict(self, x_ball, y_ball, smooth=True):
         if smooth:
@@ -59,10 +138,10 @@ class BounceDetector:
         frames_bounce = [num_frames[x] for x in ind_bounce]
         return set(frames_bounce)
 
-    def predict_new(self, x_ball, y_ball, area, angle, size_1, size_2, smooth=True):
-        if smooth:
-            x_ball, y_ball = self.smooth_predictions(x_ball, y_ball)
-        features, num_frames = self.prepare_features(x_ball, y_ball, area, angle, size_1, size_2)
+    def predict_new(self, x_ball, y_ball, area, angle, size_1, size_2):
+        # if smooth:
+        #     x_ball, y_ball = self.smooth_predictions(x_ball, y_ball)
+        features, num_frames = self.prepare_features_new(x_ball, y_ball, area, angle, size_1, size_2)
         preds = self.model.predict(features)
         ind_bounce = np.where(preds > self.threshold)[0]
         if len(ind_bounce) > 0:
