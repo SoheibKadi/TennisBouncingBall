@@ -48,10 +48,14 @@ class BounceDetector:
         features = labels[colnames]
         return features, list(labels['frame'])
 
-    def prepare_features_new(self, x_ball, y_ball, area, angle, size_1, size_2):
-        labels = pd.DataFrame({'frame': range(len(x_ball)), 'x-coordinate': x_ball, 'y-coordinate': y_ball, 'area': area, 'angle': angle, 'size_1': size_1, 'size_2': size_2})
+    def prepare_features_new(self, x_ball, y_ball, area, angle, size_1, size_2, bounce=None):
 
-        num = 5
+        labels = pd.DataFrame({'frame': range(len(x_ball)), 'x-coordinate': x_ball, 'y-coordinate': y_ball, 'area': area, 'angle': angle, 'size_1': size_1, 'size_2': size_2})
+        # Add bounce column
+        if bounce is not None:
+            labels['bounce'] = bounce
+
+        num = 3
         eps = 1e-15
         for i in range(1, num):
             labels['x_lag_{}'.format(i)] = labels['x-coordinate'].shift(i)
@@ -101,6 +105,8 @@ class BounceDetector:
             labels = labels[labels['size_1_lag_inv_{}'.format(i)].notna()]
             labels = labels[labels['size_2_lag_{}'.format(i)].notna()]
             labels = labels[labels['size_2_lag_inv_{}'.format(i)].notna()]
+            if 'bounce' in labels.columns:
+                labels = labels[labels['bounce'].notna()]
 
         labels = labels[labels['x-coordinate'].notna()]
 
@@ -123,6 +129,8 @@ class BounceDetector:
                             ['size_2_diff_inv_{}'.format(i) for i in range(1, num)] + \
                             ['size_2_div_{}'.format(i) for i in range(1, num)]
         colnames = colnames_x + colnames_y + colnames_area + colnames_angle + colnames_size_1 + colnames_size_2
+        if 'bounce' in labels.columns:
+            colnames.append('bounce')
 
         features = labels[colnames]
         return features, list(labels['frame'])

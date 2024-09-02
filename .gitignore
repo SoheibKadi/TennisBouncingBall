@@ -1,4 +1,5 @@
 .idea
 models/*.pt
 models/*.cbm
-__pycache__
+__pycache__*
+*.npy

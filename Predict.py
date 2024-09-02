@@ -184,9 +184,5 @@ if __name__ == "__main__":
 
     cv2.destroyAllWindows()
 
-    # bounce detection
-    bounce_detector = BounceDetector(args.path_bounce_model)
-    x_ball = [x[0] for x in allBallCoordinates]
-    y_ball = [x[1] for x in allBallCoordinates]
-    bounces = bounce_detector.predict(x_ball, y_ball)
+
 
